@@ -4,23 +4,51 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField]
-    private int hp = 100;
+    public enum BulletState
+    {
+        STANDBY,
+        BUSY,
+    }
 
     [SerializeField]
-    private int atk = 10;
+    private int hp = 1;
+
+    [SerializeField]
+    private int atk = 1;
 
     public int Atk => atk;
 
-    // Start is called before the first frame update
-    void Start()
+    private BulletState state;
+    public BulletState State => state;
+
+    private Vector3 vector;
+
+    void Awake()
     {
-        Destroy(this.gameObject, 1.0f);
+        state = BulletState.STANDBY;
     }
 
     // Update is called once per frame
     void Update()
     {
-        this.transform.Translate (0.0f ,0.1f, 0.0f);
+        if(state == BulletState.BUSY) this.transform.Translate(vector);
+    }
+
+    public void Shot(Vector3 position, Vector3 vec)
+    {
+        state = BulletState.BUSY;
+        vector = vec;
+        this.gameObject.transform.position = position;
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        Debug.Log($"bullet hit <{other.gameObject.tag}>");
+        // 敵、壁に当たったら初期位置に戻す
+        if(other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("Wall"))
+        {
+            state = BulletState.STANDBY;
+            this.gameObject.transform.position = new Vector3(100.0f, 100.0f, 0.0f);
+        }
     }
 }
