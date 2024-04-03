@@ -1,48 +1,143 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
     [SerializeField]
-    private int hp = 100;
-    [SerializeField]
-    private int atk = 10;
+    private Bullet bullet;
 
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField]
+    private float initShotInterval = 1f;
+
+    [SerializeField]
+    private float initShotPointInterval = 1f;
+    public float InitShotPointInterval => initShotPointInterval;
+
+    [SerializeField]
+    private int hp = 1;
+
+    [SerializeField]
+    private Vector3 acc;
+    private Vector3 vel;
+
+    [SerializeField]
+    private Rigidbody2D regidBody2D;
+
+    // 弾の発射位置
+    [SerializeField]
+    private GameObject bulletPoint;
+
+    private List<Bullet> bullets;
+
+    // 弾の発射間隔
+    private float shotInterval;
+
+    // 弾の発射可能回数
+    private int shotPoint;
+    public int ShotPoint => shotPoint;
+    private static int shotPointMax = 10;
+
+    // 弾の発射回数リロード時間
+    private float shotPointInterval;
+    public float ShotPointInterval => shotPointInterval;
+
+    private float changeVecInterval;
+
+    void Awake()
     {
-        
+        // プレイヤー初期化
+        vel = new Vector3(0.0f, 0.0f, 0.0f);
+        shotInterval = 1;
+        changeVecInterval = UnityEngine.Random.Range(0.5f, 2.0f);
+
+        // 弾の生成
+        bullets = new List<Bullet>();
+        for(var i = 0; i < 10; i++)
+        {
+            bullets.Add(Instantiate(bullet, new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity));
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
+        shotInterval -= Time.deltaTime;
+        UpdateShotPoint();
+        InputKey();
+        Shot();
         Move();
+        Destroy();
     }
 
+    private void InputKey()
+    {
+
+    }
+
+    private void UpdateShotPoint()
+    {
+        if(shotPointMax == shotPoint)
+        {
+            shotInterval = 0;
+            return;
+        }
+        shotPointInterval -= Time.deltaTime;
+        if(shotPointInterval > 0) return;
+        shotPointInterval = initShotPointInterval;
+        shotPoint++;
+        shotPoint = math.min(shotPoint, shotPointMax);
+    }
+
+    private void Shot()
+    {
+        if(shotInterval > 0) return;
+        if(shotPoint <= 0) return;
+        shotPoint--;
+        shotPoint = math.max(shotPoint, 0);
+        var bullet = bullets.Find(x => x.State == Bullet.BulletState.STANDBY);
+        if(bullet == null)
+        {
+            Debug.Log("弾切れ");
+            return;
+        }
+        bullet.Shot(Bullet.BulletUserType.ENEMY, bulletPoint.transform.position, new Vector3(0.0f, -0.05f, 0.0f));
+        shotInterval = initShotInterval;
+    }
 
     private void Move()
     {
-        
+        vel.x = Mathf.Clamp(vel.x + acc.x, -0.01f, 0.01f);
+        this.transform.position += vel;
+
+        changeVecInterval -= Time.deltaTime;
+        if(changeVecInterval > 0) return;
+        acc.x = UnityEngine.Random.Range(-0.1f, 0.1f);
+        changeVecInterval = UnityEngine.Random.Range(0.5f, 2.0f);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void Destroy()
     {
-         
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        Debug.Log(collision.gameObject.name); 
-        if(collision.gameObject.CompareTag("Bullet"))
-        {
-            var bullet = collision.gameObject.GetComponent<Bullet>();
-            hp -= bullet.Atk;
-        }
         if(hp <= 0)
         {
             Destroy(this.gameObject);
-        }  
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        Debug.Log(other.gameObject.name);
+        vel.x = 0.0f;
+        acc.x *= -1;
+        changeVecInterval = 0.5f;
+
+        if(other.gameObject.CompareTag("Bullet"))
+        {
+            var bullet = other.gameObject.GetComponent<Bullet>();
+            if(bullets.Any(x => x == bullet)) return;
+            hp--;
+        }
     }
 }

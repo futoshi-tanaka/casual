@@ -10,6 +10,12 @@ public class Bullet : MonoBehaviour
         BUSY,
     }
 
+    public enum BulletUserType
+    {
+        PLAYER,
+        ENEMY,
+    }
+
     [SerializeField]
     private int hp = 1;
 
@@ -23,6 +29,8 @@ public class Bullet : MonoBehaviour
 
     private Vector3 vector;
 
+    private BulletUserType bulletUserType;
+
     void Awake()
     {
         state = BulletState.STANDBY;
@@ -34,8 +42,9 @@ public class Bullet : MonoBehaviour
         if(state == BulletState.BUSY) this.transform.Translate(vector);
     }
 
-    public void Shot(Vector3 position, Vector3 vec)
+    public void Shot(BulletUserType user, Vector3 position, Vector3 vec)
     {
+        bulletUserType = user;
         state = BulletState.BUSY;
         vector = vec;
         this.gameObject.transform.position = position;
@@ -44,11 +53,19 @@ public class Bullet : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D other)
     {
         Debug.Log($"bullet hit <{other.gameObject.tag}>");
-        // 敵、壁に当たったら初期位置に戻す
-        if(other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("Wall"))
+        if(other.gameObject.CompareTag("Bullet"))
         {
-            state = BulletState.STANDBY;
-            this.gameObject.transform.position = new Vector3(100.0f, 100.0f, 0.0f);
+            return;
         }
+        if(other.gameObject.CompareTag("Enemy"))
+        {
+            if(bulletUserType == BulletUserType.ENEMY) return;
+        }
+        if(other.gameObject.CompareTag("Player"))
+        {
+            if(bulletUserType == BulletUserType.PLAYER) return;
+        }
+        state = BulletState.STANDBY;
+        this.gameObject.transform.position = new Vector3(100.0f, 100.0f, 0.0f);
     }
 }

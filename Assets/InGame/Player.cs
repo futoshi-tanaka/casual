@@ -38,6 +38,7 @@ public class Player : MonoBehaviour
     // 弾の発射可能回数
     private int shotPoint;
     public int ShotPoint => shotPoint;
+    private static int shotPointMax = 10;
 
     // 弾の発射回数リロード時間
     private float shotPointInterval;
@@ -51,7 +52,8 @@ public class Player : MonoBehaviour
 
         // 弾の生成
         bullets = new List<Bullet>();
-        for(var i = 0; i < 100; i++){
+        for(var i = 0; i < 10; i++)
+        {
             bullets.Add(Instantiate(bullet, new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity));
         }
     }
@@ -92,11 +94,16 @@ public class Player : MonoBehaviour
 
     private void UpdateShotPoint()
     {
+        if(shotPointMax == shotPoint)
+        {
+            shotInterval = 0;
+            return;
+        }
         shotPointInterval -= Time.deltaTime;
         if(shotPointInterval > 0) return;
         shotPointInterval = initShotPointInterval;
         shotPoint++;
-        shotPoint = math.min(shotPoint++, 10);
+        shotPoint = math.min(shotPoint, shotPointMax);
     }
 
     private void Shot()
@@ -111,7 +118,7 @@ public class Player : MonoBehaviour
             Debug.Log("弾切れ");
             return;
         }
-        bullet.Shot(bulletPoint.transform.position, new Vector3(0.0f, 0.05f, 0.0f));
+        bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f, 0.0f));
         shotInterval = initShotInterval;
     }
 
