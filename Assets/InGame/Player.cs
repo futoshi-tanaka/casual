@@ -1,11 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    public enum PlayerState
+    {
+        ALIVE,
+        DEFEAT,
+    }
+
     [SerializeField]
     private Bullet bullet;
 
@@ -30,6 +39,9 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject bulletPoint;
 
+    [SerializeField]
+    private Button shotButton;
+
     private List<Bullet> bullets;
 
     // 弾の発射間隔
@@ -44,9 +56,15 @@ public class Player : MonoBehaviour
     private float shotPointInterval;
     public float ShotPointInterval => shotPointInterval;
 
+    private PlayerState playerState;
+    public PlayerState State => playerState;
+
+    Vector3 previousPos, currentPos;
+
     void Awake()
     {
         // プレイヤー初期化
+        playerState = PlayerState.ALIVE;
         vel = new Vector3(0.0f, 0.0f, 0.0f);
         shotInterval = 0;
 
@@ -56,6 +74,8 @@ public class Player : MonoBehaviour
         {
             bullets.Add(Instantiate(bullet, new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity));
         }
+
+        shotButton.onClick.AddListener(Shot);
     }
 
     void Update()
@@ -64,11 +84,27 @@ public class Player : MonoBehaviour
         UpdateShotPoint();
         InputKey();
         Move();
-        Destroy();
+        Defeat();
     }
 
     private void InputKey()
     {
+        // スワイプによる移動処理
+        var diffDistance = 0.0f;
+        if (Input.GetMouseButtonDown(0))
+        {
+            previousPos = Input.mousePosition;
+        }
+        if (Input.GetMouseButton(0))
+        {
+            // スワイプによる移動距離を取得
+            currentPos = Input.mousePosition;
+            diffDistance = (currentPos.x - previousPos.x) / Screen.width;
+
+            // タップ位置を更新
+            previousPos = currentPos;
+        }
+
         // 弾の発射
         if (Input.GetKey(KeyCode.Alpha1))
         {
@@ -76,14 +112,14 @@ public class Player : MonoBehaviour
         }
 
         // 左に移動
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A) || diffDistance < 0)
         {
             if (acc.x > 0) acc.x = 0;
 
             acc += new Vector3(-0.001f, 0.0f, 0.0f);
         }
         // 右に移動
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D) || diffDistance > 0)
         {
             if (acc.x < 0) acc.x = 0;
 
@@ -128,6 +164,11 @@ public class Player : MonoBehaviour
         this.transform.position += vel;
     }
 
+    private void Defeat()
+    {
+        if(hp <= 0) playerState = PlayerState.DEFEAT;
+    }
+
     private void Destroy()
     {
         if(hp <= 0)
@@ -141,5 +182,12 @@ public class Player : MonoBehaviour
         Debug.Log(other.gameObject.name);
         vel.x = 0.0f;
         acc.x = 0.0f;
+
+        if(other.gameObject.CompareTag("Bullet"))
+        {
+            var bullet = other.gameObject.GetComponent<Bullet>();
+            if(bullets.Any(x => x == bullet)) return;
+            hp--;
+        }
     }
 }

@@ -7,6 +7,12 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    public enum EnemyState
+    {
+        ALIVE,
+        DEFEAT,
+    }
+
     [SerializeField]
     private Bullet bullet;
 
@@ -47,6 +53,9 @@ public class Enemy : MonoBehaviour
 
     private float changeVecInterval;
 
+    private EnemyState enemyState;
+    public EnemyState State => enemyState;
+
     void Awake()
     {
         // プレイヤー初期化
@@ -69,7 +78,7 @@ public class Enemy : MonoBehaviour
         InputKey();
         Shot();
         Move();
-        Destroy();
+        Defeat();
     }
 
     private void InputKey()
@@ -116,6 +125,11 @@ public class Enemy : MonoBehaviour
         if(changeVecInterval > 0) return;
         acc.x = UnityEngine.Random.Range(-0.1f, 0.1f);
         changeVecInterval = UnityEngine.Random.Range(0.5f, 2.0f);
+    }
+
+    private void Defeat()
+    {
+        if(hp <= 0) enemyState = EnemyState.DEFEAT;
     }
 
     private void Destroy()

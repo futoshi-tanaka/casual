@@ -8,6 +8,9 @@ public class InGameState : MonoBehaviour
     [SerializeField]
     private Player _player;
     [SerializeField]
+    private Enemy _enemy;
+
+    [SerializeField]
     private GaugeUI _shotPointGaugeUI;
     [SerializeField]
     private PointUI _shotPointUI;
@@ -22,10 +25,10 @@ public class InGameState : MonoBehaviour
     {
         UpdateUI();
 
-         if (Input.GetKey (KeyCode.Space))
-         {
+        if(_player.State == Player.PlayerState.DEFEAT || _enemy.State == Enemy.EnemyState.DEFEAT)
+        {
             SceneManager.LoadScene("Result");
-         }
+        }
     }
 
     private void UpdateUI()
