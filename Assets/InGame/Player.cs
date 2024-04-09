@@ -3,16 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Photon.Pun;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IPunObservable
 {
     public enum PlayerState
     {
         ALIVE,
+        WIN,
         DEFEAT,
+    }
+
+    public enum PlayerAction
+    {
+        NEUTRAL,
+        SHOT,
     }
 
     [SerializeField]
@@ -35,12 +43,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     private Rigidbody2D regidBody2D;
 
+    [SerializeField]
+    private PhotonView photonView;
+
     // 弾の発射位置
     [SerializeField]
     private GameObject bulletPoint;
-
-    [SerializeField]
-    private Button shotButton;
 
     private List<Bullet> bullets;
 
@@ -74,8 +82,6 @@ public class Player : MonoBehaviour
         {
             bullets.Add(Instantiate(bullet, new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity));
         }
-
-        shotButton.onClick.AddListener(Shot);
     }
 
     void Update()
@@ -89,6 +95,8 @@ public class Player : MonoBehaviour
 
     private void InputKey()
     {
+        if(!photonView.IsMine) return;
+
         // スワイプによる移動処理
         var diffDistance = 0.0f;
         if (Input.GetMouseButtonDown(0))
@@ -109,6 +117,12 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.Alpha1))
         {
             Shot();
+        }
+
+        // 弾の発射
+        if (Input.GetKey(KeyCode.Alpha0))
+        {
+            hp--;
         }
 
         // 左に移動
@@ -142,7 +156,7 @@ public class Player : MonoBehaviour
         shotPoint = math.min(shotPoint, shotPointMax);
     }
 
-    private void Shot()
+    public void Shot()
     {
         if(shotInterval > 0) return;
         if(shotPoint <= 0) return;
@@ -160,13 +174,25 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
+        if(!photonView.IsMine) return;
         vel.x = Mathf.Clamp(vel.x + acc.x, -0.01f, 0.01f);
         this.transform.position += vel;
     }
 
     private void Defeat()
     {
-        if(hp <= 0) playerState = PlayerState.DEFEAT;
+        if(hp > 0) return;
+        SetDefeat();
+    }
+
+    public void SetDefeat()
+    {
+        playerState = PlayerState.DEFEAT;
+    }
+
+    public void SetWin()
+    {
+        playerState = PlayerState.WIN;
     }
 
     private void Destroy()
@@ -188,6 +214,21 @@ public class Player : MonoBehaviour
             var bullet = other.gameObject.GetComponent<Bullet>();
             if(bullets.Any(x => x == bullet)) return;
             hp--;
+        }
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // Transformの値をストリームに書き込んで送信する
+            stream.SendNext(transform.localPosition);
+        }
+        else
+        {
+            // 受信したストリームを読み込んでTransformの値を更新する
+            var recievePosition = (Vector3)stream.ReceiveNext();
+            transform.localPosition = new Vector3(recievePosition.x, 3.0f, recievePosition.x);
         }
     }
 }
