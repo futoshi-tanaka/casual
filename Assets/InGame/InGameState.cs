@@ -35,18 +35,6 @@ public class InGameState : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
-        // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
-        PhotonNetwork.ConnectUsingSettings();
-    }
-
-    // マスターサーバーへの接続が成功した時に呼ばれるコールバック
-    public override void OnConnectedToMaster() {
-        // "Room"という名前のルームに参加する（ルームが存在しなければ作成して参加する）
-        PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions(), TypedLobby.Default);
-    }
-
-    // ゲームサーバーへの接続が成功した時に呼ばれるコールバック
-    public override void OnJoinedRoom() {
         // プレイヤー生成
         var playerPosition = PhotonNetwork.IsMasterClient ? new Vector3(0.0f, -2.0f, 0.0f) : new Vector3(0.0f, 3.0f, 0.0f);
         var playerLotation = PhotonNetwork.IsMasterClient ? Quaternion.identity : new Quaternion(0.5f, 0.0f, 0.0f, 0.0f);
@@ -56,18 +44,6 @@ public class InGameState : MonoBehaviourPunCallbacks
         _shotButton1.onClick.AddListener(_player.Shot1);
         _shotButton2.onClick.AddListener(_player.Shot2);
         _shotButton3.onClick.AddListener(_player.Shot3);
-    }
-
-    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
-    {
-        base.OnPlayerEnteredRoom(newPlayer);
-        Debug.Log($"join player");
-    }
-
-    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
-    {
-        base.OnPlayerLeftRoom(otherPlayer);
-        Debug.Log($"left player");
     }
 
     public static Player.PlayerState GetPlayerState(Photon.Realtime.Player player)
@@ -121,9 +97,11 @@ public class InGameState : MonoBehaviourPunCallbacks
                 var otherState = GetPlayerState(PhotonNetwork.PlayerListOthers.FirstOrDefault());
         ShowDebugText($"otherPlayer state : {otherState}");
         ShowDebugText($"master client : {PhotonNetwork.IsMasterClient}");
+        /*
         foreach(var bullet in _player.Bullets)
         {
             ShowDebugText($"bulletState : {bullet.State} bulletWait : {bullet.ShotWait}");
         }
+        */
     }
 }

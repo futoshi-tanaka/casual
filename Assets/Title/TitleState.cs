@@ -7,12 +7,15 @@ using UnityEngine.UI;
 public class TitleState : MonoBehaviour
 {
     [SerializeField]
-    private Button startButton;
+    private Button onlineButton;
+    [SerializeField]
+    private Button offlineButton;
 
     // Start is called before the first frame update
     void Awake()
     {
-        startButton.onClick.AddListener(NextState);
+        offlineButton.onClick.AddListener(() =>NextState("Ingame"));
+        onlineButton.onClick.AddListener(() => NextState("Lobby"));
     }
 
     // Update is called once per frame
@@ -24,8 +27,8 @@ public class TitleState : MonoBehaviour
          }
     }
 
-    public void NextState()
+    public void NextState(string sceneName)
     {
-        SceneManager.LoadScene("Ingame");
+        SceneManager.LoadScene(sceneName);
     }
 }

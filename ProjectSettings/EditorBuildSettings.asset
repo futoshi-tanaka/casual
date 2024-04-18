@@ -14,5 +14,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Result.unity
     guid: b57dcdedb6a408a49b946a49fd5ad13d
+  - enabled: 1
+    path: Assets/Scenes/Lobby.unity
+    guid: a78eeb982812e1c43a9dab9ae343d39d
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
