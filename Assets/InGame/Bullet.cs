@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class Bullet : MonoBehaviour, IPunObservable
 {
     public enum BulletState
     {
@@ -67,5 +68,21 @@ public class Bullet : MonoBehaviour
         }
         state = BulletState.STANDBY;
         this.gameObject.transform.position = new Vector3(100.0f, 100.0f, 0.0f);
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // Transformの値をストリームに書き込んで送信する
+            stream.SendNext(transform.localPosition);
+        }
+        else
+        {
+            // 受信したストリームを読み込んでTransformの値を更新する
+            var recievePosition = (Vector3)stream.ReceiveNext();
+            transform.localPosition = new Vector3(recievePosition.x, recievePosition.y, recievePosition.z);
+            transform.rotation = new Quaternion(0.5f, 0.0f, 0.0f, 0.0f);
+        }
     }
 }

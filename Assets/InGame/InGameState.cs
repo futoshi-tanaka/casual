@@ -42,7 +42,10 @@ public class InGameState : MonoBehaviourPunCallbacks
     // ゲームサーバーへの接続が成功した時に呼ばれるコールバック
     public override void OnJoinedRoom() {
         // プレイヤー生成
-        _player = PhotonNetwork.Instantiate("Player", new Vector3(0.0f, -2.0f, 0.0f), Quaternion.identity).GetComponent<Player>();
+        var playerPosition = PhotonNetwork.IsMasterClient ? new Vector3(0.0f, -2.0f, 0.0f) : new Vector3(0.0f, 3.0f, 0.0f);
+        var playerLotation = PhotonNetwork.IsMasterClient ? Quaternion.identity : new Quaternion(0.5f, 0.0f, 0.0f, 0.0f);
+        _player = PhotonNetwork.Instantiate("Player", playerPosition, playerLotation).GetComponent<Player>();
+        _player.CreateBullet();
         // UI設定
         _shotButton.onClick.AddListener(_player.Shot);
     }
@@ -91,11 +94,24 @@ public class InGameState : MonoBehaviourPunCallbacks
         _shotPointUI.SetText($"{_player.ShotPoint}");
     }
 
+    int debugWidth = 300;
+    int debugHeight = 20;
+    int debugX = 1;
+    int debugY = 1;
+
+    private void ShowDebugText(string text)
+    {
+        GUI.Box(new Rect(debugX, debugY, debugWidth, debugHeight), text);
+        debugY += debugHeight;
+    }
     public void OnGUI()
     {
-        GUI.Box(new Rect(1, 1, 300, 30), $"connect players : {PhotonNetwork.PlayerList.Length}");
-        GUI.Box(new Rect(1, 30, 300, 30), $"player state : {_player.State}");
-        var otherState = GetPlayerState(PhotonNetwork.PlayerListOthers.FirstOrDefault());
-        GUI.Box(new Rect(1, 60, 300, 30), $"otherPlayer state : {otherState}");
+        debugX = 1;
+        debugY = 1;
+        ShowDebugText($"connect players : {PhotonNetwork.PlayerList.Length}");
+        ShowDebugText($"player state : {_player.State}");
+                var otherState = GetPlayerState(PhotonNetwork.PlayerListOthers.FirstOrDefault());
+        ShowDebugText($"otherPlayer state : {otherState}");
+        ShowDebugText($"master client : {PhotonNetwork.IsMasterClient}");
     }
 }

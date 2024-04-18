@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Photon.Pun;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -50,6 +51,9 @@ public class Player : MonoBehaviour, IPunObservable
     [SerializeField]
     private GameObject bulletPoint;
 
+    [SerializeField]
+    private TextMeshPro textPlayerName;
+
     private List<Bullet> bullets;
 
     // 弾の発射間隔
@@ -75,13 +79,9 @@ public class Player : MonoBehaviour, IPunObservable
         playerState = PlayerState.ALIVE;
         vel = new Vector3(0.0f, 0.0f, 0.0f);
         shotInterval = 0;
-
-        // 弾の生成
-        bullets = new List<Bullet>();
-        for(var i = 0; i < 10; i++)
-        {
-            bullets.Add(Instantiate(bullet, new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity));
-        }
+        var name = photonView.IsMine ? "Player" : "Enemy";
+        textPlayerName.SetText(name);
+        textPlayerName.transform.rotation = textPlayerName.transform.localRotation;
     }
 
     void Update()
@@ -95,7 +95,14 @@ public class Player : MonoBehaviour, IPunObservable
 
     private void InputKey()
     {
-        if(!photonView.IsMine) return;
+        if(!photonView.IsMine)
+        {
+            if (Input.GetKey(KeyCode.Alpha4))
+            {
+                Shot();
+            }
+            return;
+        }
 
         // スワイプによる移動処理
         var diffDistance = 0.0f;
@@ -168,7 +175,8 @@ public class Player : MonoBehaviour, IPunObservable
             Debug.Log("弾切れ");
             return;
         }
-        bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f, 0.0f));
+        var rot = transform.rotation.x == 0 == true ? 1 : -1;
+        bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f * rot, 0.0f));
         shotInterval = initShotInterval;
     }
 
@@ -203,6 +211,16 @@ public class Player : MonoBehaviour, IPunObservable
         }
     }
 
+    public void CreateBullet()
+    {
+        // 弾の生成
+        bullets = new List<Bullet>();
+        for(var i = 0; i < 10; i++)
+        {
+            bullets.Add(PhotonNetwork.Instantiate("Bullet", new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity).GetComponent<Bullet>());
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D other)
     {
         Debug.Log(other.gameObject.name);
@@ -212,7 +230,7 @@ public class Player : MonoBehaviour, IPunObservable
         if(other.gameObject.CompareTag("Bullet"))
         {
             var bullet = other.gameObject.GetComponent<Bullet>();
-            if(bullets.Any(x => x == bullet)) return;
+            if(bullets == null || bullets.Any(x => x == bullet)) return;
             hp--;
         }
     }
@@ -228,7 +246,7 @@ public class Player : MonoBehaviour, IPunObservable
         {
             // 受信したストリームを読み込んでTransformの値を更新する
             var recievePosition = (Vector3)stream.ReceiveNext();
-            transform.localPosition = new Vector3(recievePosition.x, 3.0f, recievePosition.x);
+            transform.localPosition = recievePosition;
         }
     }
 }
