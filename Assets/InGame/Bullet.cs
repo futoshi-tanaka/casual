@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour, IPunObservable
@@ -32,6 +33,10 @@ public class Bullet : MonoBehaviour, IPunObservable
 
     private BulletUserType bulletUserType;
 
+    // 弾が発射されるまでのウェイト
+    private int shotWait;
+    public int ShotWait => shotWait;
+
     void Awake()
     {
         state = BulletState.STANDBY;
@@ -40,11 +45,18 @@ public class Bullet : MonoBehaviour, IPunObservable
     // Update is called once per frame
     void Update()
     {
-        if(state == BulletState.BUSY) this.transform.Translate(vector);
+        // 弾のウェイトチェック
+        if(state == BulletState.BUSY)
+        {
+            shotWait--;
+            shotWait = math.max(shotWait, 0);
+        }
+        if(state == BulletState.BUSY && shotWait <= 0) this.transform.Translate(vector);
     }
 
-    public void Shot(BulletUserType user, Vector3 position, Vector3 vec)
+    public void Shot(BulletUserType user, Vector3 position, Vector3 vec, int wait = 0)
     {
+        shotWait = wait;
         bulletUserType = user;
         state = BulletState.BUSY;
         vector = vec;

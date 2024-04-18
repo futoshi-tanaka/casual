@@ -21,7 +21,13 @@ public class InGameState : MonoBehaviourPunCallbacks
     private PointUI _shotPointUI;
 
     [SerializeField]
-    private Button _shotButton;
+    private Button _shotButton1;
+
+    [SerializeField]
+    private Button _shotButton2;
+
+    [SerializeField]
+    private Button _shotButton3;
 
     private const string PlayerStateKey = "PlayerState";
 
@@ -47,7 +53,9 @@ public class InGameState : MonoBehaviourPunCallbacks
         _player = PhotonNetwork.Instantiate("Player", playerPosition, playerLotation).GetComponent<Player>();
         _player.CreateBullet();
         // UI設定
-        _shotButton.onClick.AddListener(_player.Shot);
+        _shotButton1.onClick.AddListener(_player.Shot1);
+        _shotButton2.onClick.AddListener(_player.Shot2);
+        _shotButton3.onClick.AddListener(_player.Shot3);
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
@@ -113,5 +121,9 @@ public class InGameState : MonoBehaviourPunCallbacks
                 var otherState = GetPlayerState(PhotonNetwork.PlayerListOthers.FirstOrDefault());
         ShowDebugText($"otherPlayer state : {otherState}");
         ShowDebugText($"master client : {PhotonNetwork.IsMasterClient}");
+        foreach(var bullet in _player.Bullets)
+        {
+            ShowDebugText($"bulletState : {bullet.State} bulletWait : {bullet.ShotWait}");
+        }
     }
 }

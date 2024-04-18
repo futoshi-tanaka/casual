@@ -55,6 +55,7 @@ public class Player : MonoBehaviour, IPunObservable
     private TextMeshPro textPlayerName;
 
     private List<Bullet> bullets;
+    public List<Bullet> Bullets => bullets;
 
     // 弾の発射間隔
     private float shotInterval;
@@ -95,15 +96,6 @@ public class Player : MonoBehaviour, IPunObservable
 
     private void InputKey()
     {
-        if(!photonView.IsMine)
-        {
-            if (Input.GetKey(KeyCode.Alpha4))
-            {
-                Shot();
-            }
-            return;
-        }
-
         // スワイプによる移動処理
         var diffDistance = 0.0f;
         if (Input.GetMouseButtonDown(0))
@@ -123,7 +115,15 @@ public class Player : MonoBehaviour, IPunObservable
         // 弾の発射
         if (Input.GetKey(KeyCode.Alpha1))
         {
-            Shot();
+            Shot1();
+        }
+        if (Input.GetKey(KeyCode.Alpha2))
+        {
+            Shot2();
+        }
+        if (Input.GetKey(KeyCode.Alpha3))
+        {
+            Shot3();
         }
 
         // 弾の発射
@@ -163,7 +163,7 @@ public class Player : MonoBehaviour, IPunObservable
         shotPoint = math.min(shotPoint, shotPointMax);
     }
 
-    public void Shot()
+    public void Shot1()
     {
         if(shotInterval > 0) return;
         if(shotPoint <= 0) return;
@@ -177,6 +177,52 @@ public class Player : MonoBehaviour, IPunObservable
         }
         var rot = transform.rotation.x == 0 == true ? 1 : -1;
         bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f * rot, 0.0f));
+        shotInterval = initShotInterval;
+    }
+
+    const int shot2BulletNum = 3;
+    const int shot2Wait = 10;
+    public void Shot2()
+    {
+        if(shotInterval > 0) return;
+        if(shotPoint < shot2BulletNum) return;
+        shotPoint -= shot2BulletNum;
+        shotPoint = math.max(shotPoint, 0);
+        var stanbyBullet = bullets.FindAll(x => x.State == Bullet.BulletState.STANDBY);
+        if(stanbyBullet == null || stanbyBullet.Count < shot2BulletNum)
+        {
+            Debug.Log("弾切れ");
+            return;
+        }
+        var rot = transform.rotation.x == 0 == true ? 1 : -1;
+        for(var i = 0; i < shot2BulletNum; i++)
+        {
+            var bullet = stanbyBullet[i];
+            bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f * rot, 0.0f), i * shot2Wait);
+        }
+        shotInterval = initShotInterval;
+    }
+
+    const int shot3BulletNum = 5;
+    const int shot3Wait = 0;
+    const float shot3VecX = 0.005f;
+    public void Shot3()
+    {
+        if(shotInterval > 0) return;
+        if(shotPoint < shot3BulletNum) return;
+        shotPoint -= shot3BulletNum;
+        var stanbyBullet = bullets.FindAll(x => x.State == Bullet.BulletState.STANDBY);
+        if(stanbyBullet == null || stanbyBullet.Count < shot2BulletNum)
+        {
+            Debug.Log("弾切れ");
+            return;
+        }
+        var rot = transform.rotation.x == 0 == true ? 1 : -1;
+        for(var i = 0; i < shot3BulletNum; i++)
+        {
+            var bullet = stanbyBullet[i];
+            bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(-shot3VecX * (int)(shot3BulletNum / 2) + shot3VecX * i, 0.05f * rot, 0.0f), shot3Wait);
+        }
         shotInterval = initShotInterval;
     }
 
