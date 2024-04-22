@@ -17,7 +17,7 @@ public class LobbyState : MonoBehaviourPunCallbacks
         // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
         PhotonNetwork.ConnectUsingSettings();
 
-        cancelButton.onClick.AddListener(() => NextState("Title"));
+        cancelButton.onClick.AddListener(OnCancel);
     }
 
     // マスターサーバーへの接続が成功した時に呼ばれるコールバック
@@ -63,6 +63,7 @@ public class LobbyState : MonoBehaviourPunCallbacks
     {
         base.OnPlayerLeftRoom(otherPlayer);
         Debug.Log($"left player");
+        PhotonNetwork.CurrentRoom.IsOpen = true;
     }
 
     // Update is called once per frame
@@ -72,6 +73,14 @@ public class LobbyState : MonoBehaviourPunCallbacks
          {
             SceneManager.LoadScene("Title");
          }
+    }
+
+    private void OnCancel()
+    {
+        // Photonのサーバーから切断する
+        PhotonNetwork.Disconnect();
+
+        NextState("Title");
     }
 
     public void NextState(string sceneName)

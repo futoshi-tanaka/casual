@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -14,7 +15,11 @@ public class TitleState : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        offlineButton.onClick.AddListener(() =>NextState("Ingame"));
+        offlineButton.onClick.AddListener(() =>
+        {
+            PhotonNetwork.OfflineMode = true;
+            NextState("Ingame");
+        });
         onlineButton.onClick.AddListener(() => NextState("Lobby"));
     }
 

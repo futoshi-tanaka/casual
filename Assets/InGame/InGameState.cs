@@ -11,6 +11,9 @@ using System.Linq;
 public class InGameState : MonoBehaviourPunCallbacks
 {
     [SerializeField]
+    private Camera _mainCamera;
+
+    [SerializeField]
     private Player _player;
     [SerializeField]
     private Enemy _enemy;
@@ -29,53 +32,124 @@ public class InGameState : MonoBehaviourPunCallbacks
     [SerializeField]
     private Button _shotButton3;
 
-    private const string PlayerStateKey = "PlayerState";
+    [SerializeField]
+    private GaugeUI _enemyShotPointGaugeUI;
+    [SerializeField]
+    private PointUI _enemyShotPointUI;
 
-    private static readonly ExitGames.Client.Photon.Hashtable propsToSet = new ExitGames.Client.Photon.Hashtable();
+    [SerializeField]
+    private Button _enemyShotButton1;
+
+    [SerializeField]
+    private Button _enemyShotButton2;
+
+    [SerializeField]
+    private Button _enemyShotButton3;
+
+    [SerializeField]
+    private Button _cancelButton;
+
+    [SerializeField]
+    private Transform _initPlayerPosition;
+
+    [SerializeField]
+    private Transform _initEnemyPosition;
+
+    private bool isOffline = PhotonNetwork.OfflineMode;
+
+    private PlayerInfo myPlayerInfo;
+    private PlayerInfo otherPlayerInfo;
 
     private void Awake()
     {
         // プレイヤー生成
-        var playerPosition = PhotonNetwork.IsMasterClient ? new Vector3(0.0f, -2.0f, 0.0f) : new Vector3(0.0f, 3.0f, 0.0f);
+        var playerPosition = PhotonNetwork.IsMasterClient ? _initPlayerPosition.transform.localPosition : _initEnemyPosition.transform.localPosition;
         var playerLotation = PhotonNetwork.IsMasterClient ? Quaternion.identity : new Quaternion(0.5f, 0.0f, 0.0f, 0.0f);
-        _player = PhotonNetwork.Instantiate("Player", playerPosition, playerLotation).GetComponent<Player>();
-        _player.CreateBullet();
+        if(isOffline)
+        {
+            _player = Instantiate(_player, playerPosition, playerLotation).GetComponent<Player>();
+            _player.CreateBullet(true);
+
+            _enemy = Instantiate(_enemy, _initEnemyPosition.transform.localPosition, quaternion.identity);
+        }
+        else
+        {
+            _player = PhotonNetwork.Instantiate("Player", playerPosition, playerLotation).GetComponent<Player>();
+            _player.CreateBullet();
+        }
         // UI設定
         _shotButton1.onClick.AddListener(_player.Shot1);
         _shotButton2.onClick.AddListener(_player.Shot2);
         _shotButton3.onClick.AddListener(_player.Shot3);
-    }
+        _cancelButton.onClick.AddListener(OnCancel);
 
-    public static Player.PlayerState GetPlayerState(Photon.Realtime.Player player)
-    {
-        if(player == null) return 0;
-        var state = (player.CustomProperties[PlayerStateKey] is int value) ? value : 0;
-        return (Player.PlayerState)state;
-    }
+        // メインカメラの対戦方向の回転
+        var cameraRotZ = PhotonNetwork.IsMasterClient ? 0.0f : 180.0f;
+        _mainCamera.transform.rotation = new Quaternion(0.0f, 0.0f, cameraRotZ, 0.0f);
 
-    public static void SetPlayerState(Photon.Realtime.Player player, Player.PlayerState playerState) {
-        propsToSet[PlayerStateKey] = (int)playerState;
-        player.SetCustomProperties(propsToSet);
-        propsToSet.Clear();
+        // プレイヤー同期情報初期化
+        myPlayerInfo = new PlayerInfo();
+        myPlayerInfo.player = _player;
+        otherPlayerInfo = new PlayerInfo();
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdateUI();
+        if(PhotonNetwork.IsConnectedAndReady)
+        {
+            myPlayerInfo.SendPlayerInfo();
+            otherPlayerInfo.RecievePlayerInfo();
 
-        SetPlayerState(PhotonNetwork.LocalPlayer, _player.State);
-        var otherState = GetPlayerState(PhotonNetwork.PlayerListOthers.FirstOrDefault());
-        if(otherState == Player.PlayerState.DEFEAT)
+            if(otherPlayerInfo.playerState == Player.PlayerState.DEFEAT)
         {
             _player.SetWin();
         }
+        }
+
+        UpdateUI();
     }
 
     private void UpdateUI()
     {
+        // 自分のUI
         _shotPointGaugeUI.UpdateGauge(_player.InitShotPointInterval - _player.ShotPointInterval, _player.InitShotPointInterval);
         _shotPointUI.SetText($"{_player.ShotPoint}");
+
+        // 対戦相手のUI
+        if(isOffline)
+        {
+            _enemyShotPointGaugeUI.UpdateGauge(_enemy.InitShotPointInterval - _enemy.ShotPointInterval, _enemy.InitShotPointInterval);
+            _enemyShotPointUI.SetText($"{_enemy.ShotPoint}");
+        }
+        else
+        {
+            _enemyShotPointGaugeUI.UpdateGauge(_player.InitShotPointInterval - otherPlayerInfo.ShotPointInterval, _player.InitShotPointInterval);
+            _enemyShotPointUI.SetText($"{otherPlayerInfo.ShotPoint}");
+        }
+    }
+
+    private void Win()
+    {
+
+    }
+
+    private void Lose()
+    {
+
+    }
+
+    private void OnCancel()
+    {
+        // Photonのサーバーから切断する
+        PhotonNetwork.Disconnect();
+
+        NextState("Title");
+    }
+
+    public void NextState(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
     }
 
     int debugWidth = 300;
@@ -94,8 +168,7 @@ public class InGameState : MonoBehaviourPunCallbacks
         debugY = 1;
         ShowDebugText($"connect players : {PhotonNetwork.PlayerList.Length}");
         ShowDebugText($"player state : {_player.State}");
-                var otherState = GetPlayerState(PhotonNetwork.PlayerListOthers.FirstOrDefault());
-        ShowDebugText($"otherPlayer state : {otherState}");
+        ShowDebugText($"otherPlayer state : {otherPlayerInfo.playerState}");
         ShowDebugText($"master client : {PhotonNetwork.IsMasterClient}");
         /*
         foreach(var bullet in _player.Bullets)

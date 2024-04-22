@@ -74,13 +74,19 @@ public class Player : MonoBehaviour, IPunObservable
 
     Vector3 previousPos, currentPos;
 
+    // 自キャラ判定（オフラインモードは強制True）
+    private bool isMine;
+
+    private bool cameraRotationMode = !PhotonNetwork.IsMasterClient;
+
     void Awake()
     {
         // プレイヤー初期化
         playerState = PlayerState.ALIVE;
         vel = new Vector3(0.0f, 0.0f, 0.0f);
         shotInterval = 0;
-        var name = photonView.IsMine ? "Player" : "Enemy";
+        isMine = PhotonNetwork.OfflineMode ? true : photonView.IsMine;
+        var name = isMine ? "Player" : "Enemy";
         textPlayerName.SetText(name);
         textPlayerName.transform.rotation = textPlayerName.transform.localRotation;
     }
@@ -228,8 +234,9 @@ public class Player : MonoBehaviour, IPunObservable
 
     private void Move()
     {
-        if(!photonView.IsMine) return;
-        vel.x = Mathf.Clamp(vel.x + acc.x, -0.01f, 0.01f);
+        if(!isMine) return;
+        var inversion = cameraRotationMode ? -1: 1;
+        vel.x = Mathf.Clamp(vel.x + acc.x, -0.01f, 0.01f) * inversion;
         this.transform.position += vel;
     }
 
@@ -257,13 +264,20 @@ public class Player : MonoBehaviour, IPunObservable
         }
     }
 
-    public void CreateBullet()
+    public void CreateBullet(bool isOffline = false)
     {
         // 弾の生成
         bullets = new List<Bullet>();
         for(var i = 0; i < 10; i++)
         {
-            bullets.Add(PhotonNetwork.Instantiate("Bullet", new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity).GetComponent<Bullet>());
+            if(isOffline)
+            {
+                bullets.Add(Instantiate(bullet, new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity).GetComponent<Bullet>());
+            }
+            else
+            {
+                bullets.Add(PhotonNetwork.Instantiate("Bullet", new Vector3(100.0f, 100.0f, 0.0f), quaternion.identity).GetComponent<Bullet>());
+            }
         }
     }
 
