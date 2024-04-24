@@ -9,6 +9,7 @@ public class Enemy : MonoBehaviour
 {
     public enum EnemyState
     {
+        STANDBY,
         ALIVE,
         DEFEAT,
     }
@@ -56,12 +57,17 @@ public class Enemy : MonoBehaviour
     private EnemyState enemyState;
     public EnemyState State => enemyState;
 
+    public int enemyAIShotInterval;
+
+    public float enemyStanbyTimer = 3.0f;
+
     void Awake()
     {
         // プレイヤー初期化
         vel = new Vector3(0.0f, 0.0f, 0.0f);
         shotInterval = 1;
         changeVecInterval = UnityEngine.Random.Range(0.5f, 2.0f);
+        enemyState = EnemyState.STANDBY;
 
         // 弾の生成
         bullets = new List<Bullet>();
@@ -74,6 +80,11 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         shotInterval -= Time.deltaTime;
+        enemyStanbyTimer -= Time.deltaTime;
+        if(enemyStanbyTimer <= 0 && enemyState == EnemyState.STANDBY)
+        {
+            enemyState = EnemyState.ALIVE;
+        }
         UpdateShotPoint();
         InputKey();
         Shot();
@@ -102,8 +113,11 @@ public class Enemy : MonoBehaviour
 
     private void Shot()
     {
+        if(enemyState != EnemyState.ALIVE) return;
         if(shotInterval > 0) return;
         if(shotPoint <= 0) return;
+        enemyAIShotInterval--;
+        if(enemyAIShotInterval > 0) return;
         shotPoint--;
         shotPoint = math.max(shotPoint, 0);
         var bullet = bullets.Find(x => x.State == Bullet.BulletState.STANDBY);
@@ -114,6 +128,7 @@ public class Enemy : MonoBehaviour
         }
         bullet.Shot(Bullet.BulletUserType.ENEMY, bulletPoint.transform.position, new Vector3(0.0f, -0.05f, 0.0f));
         shotInterval = initShotInterval;
+        enemyAIShotInterval = UnityEngine.Random.Range(0, 500);
     }
 
     private void Move()

@@ -15,6 +15,9 @@ public class TitleState : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+
         offlineButton.onClick.AddListener(() =>
         {
             PhotonNetwork.OfflineMode = true;

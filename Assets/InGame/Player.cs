@@ -13,6 +13,7 @@ public class Player : MonoBehaviour, IPunObservable
 {
     public enum PlayerState
     {
+        STANDBY,
         ALIVE,
         WIN,
         DEFEAT,
@@ -94,6 +95,7 @@ public class Player : MonoBehaviour, IPunObservable
     void Update()
     {
         shotInterval -= Time.deltaTime;
+        if(playerState == PlayerState.DEFEAT) return;
         UpdateShotPoint();
         InputKey();
         Move();
@@ -171,6 +173,7 @@ public class Player : MonoBehaviour, IPunObservable
 
     public void Shot1()
     {
+        if(playerState != PlayerState.ALIVE) return;
         if(shotInterval > 0) return;
         if(shotPoint <= 0) return;
         shotPoint--;
@@ -190,6 +193,7 @@ public class Player : MonoBehaviour, IPunObservable
     const int shot2Wait = 10;
     public void Shot2()
     {
+        if(playerState != PlayerState.ALIVE) return;
         if(shotInterval > 0) return;
         if(shotPoint < shot2BulletNum) return;
         shotPoint -= shot2BulletNum;
@@ -214,6 +218,7 @@ public class Player : MonoBehaviour, IPunObservable
     const float shot3VecX = 0.005f;
     public void Shot3()
     {
+        if(playerState != PlayerState.ALIVE) return;
         if(shotInterval > 0) return;
         if(shotPoint < shot3BulletNum) return;
         shotPoint -= shot3BulletNum;
@@ -244,6 +249,16 @@ public class Player : MonoBehaviour, IPunObservable
     {
         if(hp > 0) return;
         SetDefeat();
+    }
+
+    public void SetStanby()
+    {
+        playerState = PlayerState.STANDBY;
+    }
+
+    public void SetAlive()
+    {
+        playerState = PlayerState.ALIVE;
     }
 
     public void SetDefeat()
