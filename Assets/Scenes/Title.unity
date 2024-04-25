@@ -708,6 +708,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onlineButton: {fileID: 240473072}
   offlineButton: {fileID: 1574094037}
+  modalUI: {fileID: 8961533963027786155, guid: 15e78f244c808b945aa2df04b4a646f1, type: 3}
+  canvas: {fileID: 1619299889}
 --- !u!4 &1531518707
 Transform:
   m_ObjectHideFlags: 0
@@ -925,7 +927,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!224 &1619299890
 RectTransform:
@@ -1091,7 +1093,7 @@ CanvasRenderer:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1531518707}
   - {fileID: 245125838}
   - {fileID: 1619299890}
   - {fileID: 476774656}
-  - {fileID: 1531518707}

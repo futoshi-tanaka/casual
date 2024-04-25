@@ -11,6 +11,10 @@ public class TitleState : MonoBehaviour
     private Button onlineButton;
     [SerializeField]
     private Button offlineButton;
+    [SerializeField]
+    private ModalUI modalUI;
+    [SerializeField]
+    private Canvas canvas;
 
     // Start is called before the first frame update
     void Awake()
@@ -24,6 +28,14 @@ public class TitleState : MonoBehaviour
             NextState("Ingame");
         });
         onlineButton.onClick.AddListener(() => NextState("Lobby"));
+
+        modalUI = Instantiate(modalUI).GetComponent<ModalUI>();
+        modalUI.transform.SetParent(canvas.transform, false);
+        modalUI.Open("Update",
+                     "update infomation!",
+                    () => {
+                        modalUI.Close();
+                    });
     }
 
     // Update is called once per frame
