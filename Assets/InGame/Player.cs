@@ -184,8 +184,8 @@ public class Player : MonoBehaviour, IPunObservable
             Debug.Log("弾切れ");
             return;
         }
-        var rot = transform.rotation.x == 0 == true ? 1 : -1;
-        bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f * rot, 0.0f));
+        var rot = transform.rotation.x == 0 ? 0f : 180.0f;
+        bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f, 0.0f), rot);
         shotInterval = initShotInterval;
     }
 
@@ -204,11 +204,11 @@ public class Player : MonoBehaviour, IPunObservable
             Debug.Log("弾切れ");
             return;
         }
-        var rot = transform.rotation.x == 0 == true ? 1 : -1;
+        var rot = transform.rotation.x == 0 ? 0f : 180.0f;
         for(var i = 0; i < shot2BulletNum; i++)
         {
             var bullet = stanbyBullet[i];
-            bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f * rot, 0.0f), i * shot2Wait);
+            bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(0.0f, 0.05f, 0.0f), rot, i * shot2Wait);
         }
         shotInterval = initShotInterval;
     }
@@ -228,11 +228,11 @@ public class Player : MonoBehaviour, IPunObservable
             Debug.Log("弾切れ");
             return;
         }
-        var rot = transform.rotation.x == 0 == true ? 1 : -1;
+        var rot = transform.rotation.x == 0 ? 0f : 180.0f;
         for(var i = 0; i < shot3BulletNum; i++)
         {
             var bullet = stanbyBullet[i];
-            bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(-shot3VecX * (int)(shot3BulletNum / 2) + shot3VecX * i, 0.05f * rot, 0.0f), shot3Wait);
+            bullet.Shot(Bullet.BulletUserType.PLAYER, bulletPoint.transform.position, new Vector3(-shot3VecX * (int)(shot3BulletNum / 2) + shot3VecX * i, 0.05f, 0.0f), rot, shot3Wait);
         }
         shotInterval = initShotInterval;
     }

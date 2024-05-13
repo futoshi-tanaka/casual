@@ -111,7 +111,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847,
+  m_Sprite: {fileID: -1147401495359466748, guid: 138040323294fd440a3a823e5d70ad01,
     type: 3}
   m_Color: {r: 0.6226415, g: 0.032306872, b: 0.032306872, a: 1}
   m_FlipX: 0
@@ -142,6 +142,8 @@ MonoBehaviour:
   acc: {x: 0, y: 0, z: 0}
   regidBody2D: {fileID: 7710758745801352161}
   bulletPoint: {fileID: 2271001166028137384}
+  enemyAIShotInterval: 0
+  enemyStanbyTimer: 3
 --- !u!50 &7710758745801352161
 Rigidbody2D:
   serializedVersion: 4

@@ -54,13 +54,14 @@ public class Bullet : MonoBehaviour, IPunObservable
         if(state == BulletState.BUSY && shotWait <= 0) this.transform.Translate(vector);
     }
 
-    public void Shot(BulletUserType user, Vector3 position, Vector3 vec, int wait = 0)
+    public void Shot(BulletUserType user, Vector3 position, Vector3 vec, float rotZ, int wait = 0)
     {
         shotWait = wait;
         bulletUserType = user;
         state = BulletState.BUSY;
         vector = vec;
         this.gameObject.transform.position = position;
+        this.gameObject.transform.rotation = new Quaternion(gameObject.transform.rotation.x, gameObject.transform.rotation.y, rotZ, gameObject.transform.rotation.w);
     }
 
     private void OnCollisionEnter2D(Collision2D other)

@@ -126,7 +126,7 @@ public class Enemy : MonoBehaviour
             Debug.Log("弾切れ");
             return;
         }
-        bullet.Shot(Bullet.BulletUserType.ENEMY, bulletPoint.transform.position, new Vector3(0.0f, -0.05f, 0.0f));
+        bullet.Shot(Bullet.BulletUserType.ENEMY, bulletPoint.transform.position, new Vector3(0.0f, 0.05f, 0.0f), 180f);
         shotInterval = initShotInterval;
         enemyAIShotInterval = UnityEngine.Random.Range(0, 500);
     }
