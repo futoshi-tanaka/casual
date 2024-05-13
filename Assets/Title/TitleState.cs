@@ -12,9 +12,13 @@ public class TitleState : MonoBehaviour
     [SerializeField]
     private Button offlineButton;
     [SerializeField]
+    private Button characterButton;
+    [SerializeField]
     private ModalUI modalUI;
     [SerializeField]
     private Canvas canvas;
+    [SerializeField]
+    private FadeUI fadeUI;
 
     // Start is called before the first frame update
     void Awake()
@@ -28,6 +32,7 @@ public class TitleState : MonoBehaviour
             NextState("Ingame");
         });
         onlineButton.onClick.AddListener(() => NextState("Lobby"));
+        characterButton.onClick.AddListener(() => NextState("custom"));
 
         modalUI = Instantiate(modalUI).GetComponent<ModalUI>();
         modalUI.transform.SetParent(canvas.transform, false);
@@ -36,6 +41,8 @@ public class TitleState : MonoBehaviour
                     () => {
                         modalUI.Close();
                     });
+        fadeUI.Initialize();
+        fadeUI.FadeOut();
     }
 
     // Update is called once per frame
@@ -49,6 +56,6 @@ public class TitleState : MonoBehaviour
 
     public void NextState(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        fadeUI.FadeIn(onComplete: () => SceneManager.LoadScene(sceneName));
     }
 }

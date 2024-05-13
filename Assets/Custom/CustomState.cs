@@ -34,6 +34,13 @@ public class CustomState : MonoBehaviour
     [SerializeField]
     private Button skill3Button;
 
+    [SerializeField]
+    private Button nextButton;
+    [SerializeField]
+    private Button returnButton;
+
+    [SerializeField]
+    private FadeUI fadeUI;
 
     // Start is called before the first frame update
     void Awake()
@@ -43,6 +50,9 @@ public class CustomState : MonoBehaviour
 
     private void InitializeUI()
     {
+        fadeUI.Initialize();
+        returnButton.onClick.AddListener(() => NextState("Title"));
+        nextButton.onClick.AddListener(() => NextState("Title"));
         // プレイヤーキャラ選択情報をロード
         var characterId = PlayerPrefsManager.LoadPlayerId();
         var slot1Id = PlayerPrefsManager.LoadPlayerSlot1Id();
@@ -53,6 +63,8 @@ public class CustomState : MonoBehaviour
         characterList.Add(new SkillInfo(1, "chara1"));
         characterList.Add(new SkillInfo(2, "chara2"));
         characterList.Add(new SkillInfo(3, "chara3"));
+        characterList.Add(new SkillInfo(4, "chara4"));
+        characterList.Add(new SkillInfo(5, "chara5"));
 
         var skill1List = new List<SkillInfo>();
         skill1List.Add(new SkillInfo(1, "1"));
@@ -81,6 +93,7 @@ public class CustomState : MonoBehaviour
             {
                 characterName.SetText(entity.name);
                 UpdateCharacterButton(entity.id);
+                PlayerPrefsManager.SavePlayerId(entity.id);
             };
             button.GetComponent<ButtonUI>().Initialize(entity);
             characterButtonList.Add(button);
@@ -90,6 +103,8 @@ public class CustomState : MonoBehaviour
         {
             characterButton.GetComponent<ButtonUI>().In();
         }
+
+        UpdateCharacterButton(characterId);
 
         // スキル1ボタンUI
         var skill1ButtonList = new List<Button>();
@@ -102,6 +117,7 @@ public class CustomState : MonoBehaviour
             entity.onClick = () =>
             {
                 UpdateSkillButton(entity.id, skill1ScrollViewContent);
+                PlayerPrefsManager.SavePlayerSlot1(entity.id);
             };
             button.GetComponent<ButtonUI>().Initialize(entity);
             skill1ButtonList.Add(button);
@@ -111,6 +127,8 @@ public class CustomState : MonoBehaviour
         {
             skill1Button.GetComponent<ButtonUI>().In();
         }
+
+        UpdateSkillButton(slot1Id, skill1ScrollViewContent);
 
         // スキル2ボタンUI
         var skill2ButtonList = new List<Button>();
@@ -123,6 +141,7 @@ public class CustomState : MonoBehaviour
             entity.onClick = () =>
             {
                 UpdateSkillButton(entity.id, skill2ScrollViewContent);
+                PlayerPrefsManager.SavePlayerSlot2(entity.id);
             };
             button.GetComponent<ButtonUI>().Initialize(entity);
             skill2ButtonList.Add(button);
@@ -132,6 +151,8 @@ public class CustomState : MonoBehaviour
         {
             skillButton.GetComponent<ButtonUI>().In();
         }
+
+        UpdateSkillButton(slot2Id, skill2ScrollViewContent);
 
         // スキル3ボタンUI
         var skill3ButtonList = new List<Button>();
@@ -144,6 +165,7 @@ public class CustomState : MonoBehaviour
             entity.onClick = () =>
             {
                 UpdateSkillButton(entity.id, skill3ScrollViewContent);
+                PlayerPrefsManager.SavePlayerSlot3(entity.id);
             };
             button.GetComponent<ButtonUI>().Initialize(entity);
             skill3ButtonList.Add(button);
@@ -153,6 +175,9 @@ public class CustomState : MonoBehaviour
         {
             skillButton.GetComponent<ButtonUI>().In();
         }
+
+        UpdateSkillButton(slot3Id, skill3ScrollViewContent);
+        fadeUI.FadeOut();
     }
 
     private void UpdateCharacterButton(int selectId)
@@ -176,14 +201,11 @@ public class CustomState : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-         if (Input.GetKey (KeyCode.Space))
-         {
-            SceneManager.LoadScene("Ingame");
-         }
+
     }
 
     public void NextState(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        fadeUI.FadeIn(onComplete: () => SceneManager.LoadScene(sceneName));
     }
 }

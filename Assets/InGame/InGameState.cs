@@ -69,6 +69,9 @@ public class InGameState : MonoBehaviourPunCallbacks
     [SerializeField]
     private Button _nextButton;
 
+    [SerializeField]
+    private FadeUI _fadeUI;
+
     private bool isOffline = PhotonNetwork.OfflineMode;
 
     private PlayerInfo myPlayerInfo;
@@ -81,6 +84,7 @@ public class InGameState : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
+        _fadeUI.Initialize();
         readyTimer = readyTime;
         inGameStatus = InGameStatus.Ready;
         // プレイヤー生成
@@ -117,6 +121,8 @@ public class InGameState : MonoBehaviourPunCallbacks
         myPlayerInfo = new PlayerInfo();
         myPlayerInfo.player = _player;
         otherPlayerInfo = new PlayerInfo();
+
+        _fadeUI.FadeOut();
     }
 
     // Update is called once per frame
@@ -225,7 +231,7 @@ public class InGameState : MonoBehaviourPunCallbacks
 
     public void NextState(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        _fadeUI.FadeIn(onComplete: () => SceneManager.LoadScene(sceneName));
     }
 
     int debugWidth = 300;

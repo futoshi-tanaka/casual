@@ -11,13 +11,19 @@ public class LobbyState : MonoBehaviourPunCallbacks
     [SerializeField]
     private Button cancelButton;
 
+    [SerializeField]
+    private FadeUI fadeUI;
+
     // Start is called before the first frame update
     void Awake()
     {
+        fadeUI.Initialize();
         // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
         PhotonNetwork.ConnectUsingSettings();
 
         cancelButton.onClick.AddListener(OnCancel);
+
+        fadeUI.FadeOut();
     }
 
     // マスターサーバーへの接続が成功した時に呼ばれるコールバック
@@ -85,6 +91,6 @@ public class LobbyState : MonoBehaviourPunCallbacks
 
     public void NextState(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        fadeUI.FadeIn(onComplete: () => SceneManager.LoadScene(sceneName));
     }
 }
