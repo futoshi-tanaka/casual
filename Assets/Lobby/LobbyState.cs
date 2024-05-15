@@ -20,6 +20,8 @@ public class LobbyState : MonoBehaviourPunCallbacks
         fadeUI.Initialize();
         // PhotonServerSettingsの設定内容を使ってマスターサーバーへ接続する
         PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.SendRate = 60; // 1秒間にメッセージ送信を行う回数
+        PhotonNetwork.SerializationRate = 60; // 1秒間にオブジェクト同期を行う回数
 
         cancelButton.onClick.AddListener(OnCancel);
 

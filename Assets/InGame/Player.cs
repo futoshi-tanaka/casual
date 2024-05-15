@@ -83,7 +83,7 @@ public class Player : MonoBehaviour, IPunObservable
     void Awake()
     {
         // プレイヤー初期化
-        playerState = PlayerState.ALIVE;
+        playerState = PlayerState.STANDBY;
         vel = new Vector3(0.0f, 0.0f, 0.0f);
         shotInterval = 0;
         isMine = PhotonNetwork.OfflineMode ? true : photonView.IsMine;
@@ -140,25 +140,47 @@ public class Player : MonoBehaviour, IPunObservable
             hp--;
         }
 
-        // 左に移動
-        if (Input.GetKey(KeyCode.A) || diffDistance < 0)
+        if(!cameraRotationMode)
         {
-            if (acc.x > 0) acc.x = 0;
+            // 左に移動
+            if (Input.GetKey(KeyCode.A) || diffDistance < 0)
+            {
+                if (acc.x > 0) acc.x = 0;
 
-            acc += new Vector3(-0.001f, 0.0f, 0.0f);
+                acc += new Vector3(-0.001f, 0.0f, 0.0f);
+            }
+            // 右に移動
+            if (Input.GetKey(KeyCode.D) || diffDistance > 0)
+            {
+                if (acc.x < 0) acc.x = 0;
+
+                acc += new Vector3(0.001f, 0.0f, 0.0f);
+            }
         }
-        // 右に移動
-        if (Input.GetKey(KeyCode.D) || diffDistance > 0)
+        else
         {
-            if (acc.x < 0) acc.x = 0;
+            // 左に移動
+            if (Input.GetKey(KeyCode.A) || diffDistance < 0)
+            {
+                if (acc.x < 0) acc.x = 0;
 
-            acc += new Vector3(0.001f, 0.0f, 0.0f);
+                acc += new Vector3(0.001f, 0.0f, 0.0f);
+            }
+            // 右に移動
+           if (Input.GetKey(KeyCode.D) || diffDistance > 0)
+            {
+                if (acc.x > 0) acc.x = 0;
+
+                acc += new Vector3(-0.001f, 0.0f, 0.0f);
+            }
         }
+
         acc.x = Mathf.Clamp(acc.x, -0.01f, 0.01f);
     }
 
     private void UpdateShotPoint()
     {
+        if(playerState != PlayerState.ALIVE) return;
         if(shotPointMax == shotPoint)
         {
             shotInterval = 0;
@@ -240,8 +262,7 @@ public class Player : MonoBehaviour, IPunObservable
     private void Move()
     {
         if(!isMine) return;
-        var inversion = cameraRotationMode ? -1: 1;
-        vel.x = Mathf.Clamp(vel.x + acc.x, -0.01f, 0.01f) * inversion;
+        vel.x = Mathf.Clamp(vel.x + acc.x, -0.01f, 0.01f);
         this.transform.position += vel;
     }
 
