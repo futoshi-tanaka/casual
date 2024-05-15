@@ -13,9 +13,9 @@ public class ModalUI : MonoBehaviour
     [SerializeField]
     private CanvasGroup canvasGroup;
     [SerializeField]
-    private TextMeshProUGUI titleText;
+    private Text titleText;
     [SerializeField]
-    private TextMeshProUGUI descriptionText;
+    private Text descriptionText;
     [SerializeField]
     private Button okButton;
     [SerializeField]
@@ -60,8 +60,8 @@ public class ModalUI : MonoBehaviour
 
     public void Open(string title, string description, UnityAction onOk)
     {
-        titleText.SetText(title);
-        descriptionText.SetText(description);
+        titleText.text = title;
+        descriptionText.text = description;
         okButton.onClick.AddListener(onOk);
         outOfModal.onClick.AddListener(Close);
         In();

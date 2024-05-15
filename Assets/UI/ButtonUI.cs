@@ -9,7 +9,7 @@ public class ButtonUI : MonoBehaviour
     [SerializeField]
     private Button button;
     [SerializeField]
-    private TextMeshProUGUI text;
+    private Text text;
     [SerializeField]
     private Image image;
 
@@ -17,6 +17,8 @@ public class ButtonUI : MonoBehaviour
     {
         public int id;
         public string name;
+        public bool visibleName;
+        public Sprite sprite;
         public UnityAction onClick;
     }
 
@@ -28,12 +30,15 @@ public class ButtonUI : MonoBehaviour
         this.entity.id = entity.id;
         this.entity.name = entity.name;
         this.entity.onClick = entity.onClick;
+        this.entity.sprite = entity.sprite;
+        this.entity.visibleName = entity.visibleName;
         Set();
     }
 
     public void Set()
     {
-        text.SetText(entity.name);
+        if(entity.visibleName) text.text = entity.name;
+        image.sprite = entity.sprite;
         button.onClick.AddListener(entity.onClick);
     }
 

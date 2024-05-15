@@ -64,7 +64,7 @@ public class InGameState : MonoBehaviourPunCallbacks
     private Transform _initEnemyPosition;
 
     [SerializeField]
-    private TextMeshProUGUI _stateText;
+    private Text _stateText;
 
     [SerializeField]
     private Button _nextButton;
@@ -109,7 +109,7 @@ public class InGameState : MonoBehaviourPunCallbacks
         _shotButton2.onClick.AddListener(_player.Shot2);
         _shotButton3.onClick.AddListener(_player.Shot3);
         _cancelButton.onClick.AddListener(OnCancel);
-        _stateText.SetText($"Ready...");
+        _stateText.text = $"Ready...";
         _nextButton.enabled = false;
         _nextButton.onClick.AddListener(OnCancel);
 
@@ -202,7 +202,7 @@ public class InGameState : MonoBehaviourPunCallbacks
     {
         inGameStatus = InGameStatus.Finish;
         _player.SetWin();
-        _stateText.SetText($"Win!!!");
+        _stateText.text = $"Win!!!";
         _stateText.enabled = true;
         ShowNextButton();
     }
@@ -210,7 +210,7 @@ public class InGameState : MonoBehaviourPunCallbacks
     private void Lose()
     {
         inGameStatus = InGameStatus.Finish;
-        _stateText.SetText($"Lose...");
+        _stateText.text = $"Lose...";
         _stateText.enabled = true;
         ShowNextButton();
     }

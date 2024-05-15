@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class CustomState : MonoBehaviour
 {
     [SerializeField]
-    private TextMeshProUGUI characterName;
+    private Text characterName;
 
     [SerializeField]
     private Transform characterScrollViewContent;
@@ -59,12 +59,11 @@ public class CustomState : MonoBehaviour
         var slot2Id = PlayerPrefsManager.LoadPlayerSlot2Id();
         var slot3Id = PlayerPrefsManager.LoadPlayerSlot3Id();
 
-        var characterList = new List<SkillInfo>();
-        characterList.Add(new SkillInfo(1, "chara1"));
-        characterList.Add(new SkillInfo(2, "chara2"));
-        characterList.Add(new SkillInfo(3, "chara3"));
-        characterList.Add(new SkillInfo(4, "chara4"));
-        characterList.Add(new SkillInfo(5, "chara5"));
+        var sprite = Resources.Load<Sprite>("bag2");
+
+        var characterList = new List<CharacterInfo>();
+        characterList.Add(new CharacterInfo(1, "chara1", "Sprites/Player"));
+        characterList.Add(new CharacterInfo(2, "chara2", "Sprites/Player"));
 
         var skill1List = new List<SkillInfo>();
         skill1List.Add(new SkillInfo(1, "1"));
@@ -89,9 +88,10 @@ public class CustomState : MonoBehaviour
             var entity = new ButtonUI.Entity();
             entity.id = character.Id;
             entity.name = character.Name;
+            entity.sprite = character.sprite;
             entity.onClick = () =>
             {
-                characterName.SetText(entity.name);
+                characterName.text = entity.name;
                 UpdateCharacterButton(entity.id);
                 PlayerPrefsManager.SavePlayerId(entity.id);
             };
@@ -185,7 +185,7 @@ public class CustomState : MonoBehaviour
         var buttons = characterScrollViewContent.GetComponentsInChildren<ButtonUI>();
         foreach(var button in buttons)
         {
-            button.SetColor( button.entity.id == selectId ? Color.red : Color.white);
+            button.SetColor( button.entity.id == selectId ? Color.yellow : Color.white);
         }
     }
 
@@ -194,7 +194,7 @@ public class CustomState : MonoBehaviour
         var buttons = scrollViewContent.GetComponentsInChildren<ButtonUI>();
         foreach(var button in buttons)
         {
-            button.SetColor( button.entity.id == selectId ? Color.red : Color.white);
+            button.SetColor( button.entity.id == selectId ? Color.yellow : Color.white);
         }
     }
 
