@@ -299,7 +299,7 @@ public class Player : MonoBehaviour, IPunObservable
     private void OnCollisionEnter2D(Collision2D other)
     {
         Debug.Log(other.gameObject.name);
-        vel.x = 0.0f;
+        vel.x *= -1f;
         acc.x = 0.0f;
 
         if(other.gameObject.CompareTag("Bullet"))
